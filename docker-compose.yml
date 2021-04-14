@@ -1,0 +1,22 @@
+﻿version: '3.9'
+
+services:
+    trackservice:
+        build: .
+        ports:
+            - 6002:6002
+        depends_on:
+            - db
+    db:
+        image: "mysql:latest"
+        volumes:
+          - sqlvolume:/var/opt/mysql
+
+        environment:
+            MYSQL_ROOT_PASSWORD: "HW5etW#4iyWCNu"
+            MYSQL_DATABASE: "qb_track_db"
+        ports:
+            - "3307:3306"
+
+volumes:
+  sqlvolume:
