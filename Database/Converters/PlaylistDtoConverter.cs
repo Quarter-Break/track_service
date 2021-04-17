@@ -1,20 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using TrackService.Database.Models;
-using TrackService.Database.Models.Dtos;
+using TrackService.Database.Models.Dtos.Requests;
+using TrackService.Database.Models.Dtos.Responses;
 
 namespace TrackService.Database.Converters
 {
     public class PlaylistDtoConverter : IDtoConverter<Playlist, PlaylistRequest, PlaylistResponse>
     {
+        private readonly IDtoConverter<Track, TrackRequest, TrackResponse> _trackConverter;
+
+        public PlaylistDtoConverter(IDtoConverter<Track, TrackRequest, TrackResponse> trackConverter)
+        {
+            _trackConverter = trackConverter;
+        }
+
         public Playlist DtoToModel(PlaylistRequest request)
         {
             return new Playlist
             {
                 Title = request.Title,
                 Description = request.Description,
-                Tracks = request.Tracks,
-                UserId = request.UserId
+                UserId = request.UserId,
             };
         }
 
@@ -25,8 +32,8 @@ namespace TrackService.Database.Converters
                 Id = model.Id,
                 Title = model.Title,
                 Description = model.Description,
-                Tracks = model.Tracks,
-                UserId = model.UserId
+                UserId = model.UserId,
+                Tracks = _trackConverter.ModelToDto(model.Tracks)
             };
         }
 

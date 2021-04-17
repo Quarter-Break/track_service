@@ -2,21 +2,31 @@
 
 services:
     trackservice:
-        build: .
+        build:
+            context: .
+            dockerfile: Dockerfile.local
+        container_name: trackservice
         ports:
-            - 6002:6002
+            - "0.0.0.0:6002:6002"
         depends_on:
             - db
+        networks:
+            - qbreak-network
     db:
-        image: "mysql:latest"
+        image: "mcr.microsoft.com/mssql/server"
         volumes:
-          - sqlvolume:/var/opt/mysql
-
+          - track_volume:/var/opt/mssql
         environment:
-            MYSQL_ROOT_PASSWORD: "HW5etW#4iyWCNu"
-            MYSQL_DATABASE: "qb_track_db"
+            SA_PASSWORD: "HW5etW#4iyWCNu"
+            ACCEPT_EULA: "Y"
         ports:
-            - "3307:3306"
+            - "0.0.0.0:1533:1433"
+        networks:
+            - qbreak-network
 
 volumes:
-  sqlvolume:
+  track_volume:
+
+networks:
+    qbreak-network:
+        external: true

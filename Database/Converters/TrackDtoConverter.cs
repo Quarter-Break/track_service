@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using TrackService.Database.Models;
-using TrackService.Database.Models.Dtos;
+using TrackService.Database.Models.Dtos.Requests;
+using TrackService.Database.Models.Dtos.Responses;
 
 namespace TrackService.Database.Converters
 {
@@ -25,7 +26,7 @@ namespace TrackService.Database.Converters
                 Title = model.Title,
                 TrackId = model.TrackId,
                 ArtistId = model.ArtistId,
-                AlbumId = model.AlbumId
+                // Add album in controller.
             };
         }
 
