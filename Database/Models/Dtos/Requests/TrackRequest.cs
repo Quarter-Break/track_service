@@ -1,18 +1,14 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 
-namespace TrackService.Database.Models.Dtos
+namespace TrackService.Database.Models.Dtos.Requests
 {
     public class TrackRequest
     {
-        [MaxLength(255)]
-        [Required]
         public string Title { get; set; }
-        [Required]
         public string TrackId { get; set; }
-        [Required]
         public Guid ArtistId { get; set; }
-        [Required]
         public Guid AlbumId { get; set; }
+        public ICollection<PlaylistTrackRequest> PlaylistTracks { get; set; }
     }
 }

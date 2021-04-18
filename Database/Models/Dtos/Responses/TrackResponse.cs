@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TrackService.Database.Models.Dtos
+namespace TrackService.Database.Models.Dtos.Responses
 {
     public class TrackResponse
     {
@@ -8,6 +8,6 @@ namespace TrackService.Database.Models.Dtos
         public string Title { get; set; }
         public string TrackId { get; set; }
         public Guid ArtistId { get; set; }
-        public Guid AlbumId { get; set; }
+        public TrackAlbumResponse Album { get; set; }
     }
 }

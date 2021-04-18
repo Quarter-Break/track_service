@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using TrackService.Database.Contexts;
 using TrackService.Database.Converters;
 using TrackService.Database.Models;
-using TrackService.Database.Models.Dtos;
+using TrackService.Database.Models.Dtos.Requests;
+using TrackService.Database.Models.Dtos.Responses;
 
 namespace TrackService.Controllers
 {
@@ -25,16 +26,35 @@ namespace TrackService.Controllers
         [HttpPost]
         public async Task<ActionResult> CreateTrack(TrackRequest request)
         {
-            _context.Tracks.Add(_converter.DtoToModel(request));
+            Album album = await _context.Albums.FirstOrDefaultAsync(e => e.Id == request.AlbumId);
+
+            if (album == null)
+            {
+                return NotFound($"Album with id {request.AlbumId} does not exist.");
+            }
+
+            Track track = _converter.DtoToModel(request);
+            _context.Tracks.Add(track);
             await _context.SaveChangesAsync();
 
-            return Created("Created", request);
+            return Created("Created", track);
         }
 
         [HttpGet]
         public async Task<ActionResult<List<TrackResponse>>> GetAllTracks()
         {
-            return Ok(_converter.ModelToDto(await _context.Tracks.ToListAsync()));
+            List<Track> tracks = await _context.Tracks.ToListAsync();
+            List<TrackResponse> trackResponses = new();
+
+            foreach (Track track in tracks)
+            {
+                Album album = await _context.Albums.FirstOrDefaultAsync(e => e.Id == track.AlbumId); // Find album.
+                TrackResponse trackResponse = _converter.ModelToDto(track);
+                trackResponse.Album = new TrackAlbumResponse(album);
+                trackResponses.Add(trackResponse);
+            }
+
+            return Ok(trackResponses);
         }
 
         [HttpGet]
@@ -48,7 +68,11 @@ namespace TrackService.Controllers
                 return NotFound("Object not found.");
             }
 
-            return Ok(_converter.ModelToDto(track));
+            Album album = await _context.Albums.FirstOrDefaultAsync(e => e.Id == track.AlbumId); // Find album.
+            TrackResponse trackResponse = _converter.ModelToDto(track);
+            trackResponse.Album = new TrackAlbumResponse(album);
+
+            return Ok(trackResponse);
         }
     }
 }

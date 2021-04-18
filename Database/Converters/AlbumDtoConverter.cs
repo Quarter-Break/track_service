@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using TrackService.Database.Models;
-using TrackService.Database.Models.Dtos;
+using TrackService.Database.Models.Dtos.Requests;
+using TrackService.Database.Models.Dtos.Responses;
 
 namespace TrackService.Database.Converters
 {

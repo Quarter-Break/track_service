@@ -2,11 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using TrackService.Database.Contexts;
 using TrackService.Database.Converters;
 using TrackService.Database.Models;
-using TrackService.Database.Models.Dtos;
+using TrackService.Database.Models.Dtos.Requests;
+using TrackService.Database.Models.Dtos.Responses;
 
 namespace TrackService.Controllers
 {
@@ -16,77 +18,53 @@ namespace TrackService.Controllers
     {
         private readonly TrackContext _context;
         private readonly IDtoConverter<Playlist, PlaylistRequest, PlaylistResponse> _converter;
-        public PlaylistController(TrackContext context, IDtoConverter<Playlist, PlaylistRequest, PlaylistResponse> converter)
+        private readonly IDtoConverter<Track, TrackRequest, TrackResponse> _trackConverter;
+        public PlaylistController(TrackContext context, IDtoConverter<Playlist, PlaylistRequest, PlaylistResponse> converter,
+            IDtoConverter<Track, TrackRequest, TrackResponse> trackConverter)
         {
             _context = context;
             _converter = converter;
+            _trackConverter = trackConverter;
         }
 
         [HttpPost]
         public async Task<ActionResult> CreatePlaylist(PlaylistRequest request)
         {
-            _context.Playlists.Add(_converter.DtoToModel(request));
+            Playlist playlist = _converter.DtoToModel(request);
+            _context.Playlists.Add(playlist);
             await _context.SaveChangesAsync();
 
-            return Created("Created", request);
-        }
-
-        [HttpPut]
-        [Route("track")]
-        public async Task<ActionResult> AddTrackToPlaylist(Guid playlistId, Guid trackId)
-        {
-            Playlist playlist = await _context.Playlists.FirstOrDefaultAsync(p => p.Id == playlistId);
-            Track track = await _context.Tracks.FirstOrDefaultAsync(t => t.Id == trackId);
-
-            if (playlist.Equals(null)) // Check if playlist exists.
-            {
-                return NotFound("Playlist does not exist.");
-            }
-
-            if (track.Equals(null)) // Check if track exists.
-            {
-                return NotFound("Track does not exist.");
-            }
-
-            //
-            // CHECK IF TRACK ALREADY EXISTS IN LIST
-            //
-
-            playlist.Tracks.Add(track); // Add track to playlist.
-            _context.Playlists.Update(playlist); // Update playlist record in DbSet.
-            _context.SaveChanges();
-
-            return Accepted();
+            return Created("Created", playlist);
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<PlaylistResponse>>> GetAllPlaylists()
+        [Route("{id}")]
+        public async Task<ActionResult<List<PlaylistResponse>>> GetPlaylistById(Guid id)
         {
-            return Ok(_converter.ModelToDto(await _context.Playlists.ToListAsync()));
-        }
-
-        [HttpDelete]
-        [Route("track")]
-        public async Task<ActionResult> RemoveTrackFromPlaylist(Guid playlistId, Guid trackId)
-        {
-            Playlist playlist = await _context.Playlists.FirstOrDefaultAsync(p => p.Id == playlistId);
-            Track track = await _context.Tracks.FirstOrDefaultAsync(t => t.Id == trackId);
-
-            if (playlist == null) // Check if playlist exists.
+            Playlist playlist = await _context.Playlists.FirstOrDefaultAsync(e => e.Id == id);
+            if (playlist == null)
             {
-                return NotFound("Playlist does not exist.");
+                return NotFound($"Playlist with id {id} does not exist.");
             }
 
-            if (track == null) // Check if track exists.
+            List<PlaylistTrack> playlistTracks = await _context.PlaylistTracks.Where(e => e.PlaylistId == id).ToListAsync();
+            List<TrackResponse> tracks = new();
+            foreach(PlaylistTrack playlistTrack in playlistTracks)
             {
-                return NotFound("Track does not exist.");
+                Track track = await _context.Tracks.FirstOrDefaultAsync(e => e.Id == playlistTrack.TrackId);
+                if (track != null)
+                {
+                    TrackResponse trackResponse = _trackConverter.ModelToDto(track);
+                    Album album = await _context.Albums.FirstOrDefaultAsync(e => e.Id == track.AlbumId); // Find album.
+                    trackResponse.Album = new TrackAlbumResponse(album);
+                    tracks.Add(trackResponse);
+                }
             }
 
-            playlist.Tracks.Remove(track); // Remove track from playlist.
-            _context.Playlists.Update(playlist); // Update playlist record in DbSet.
-            _context.SaveChanges();
+            PlaylistResponse playlistResponse = _converter.ModelToDto(playlist);
+            playlistResponse.Tracks = tracks;
 
-            return Accepted();
+            return Ok(playlistResponse);
         }
     }
 }
