@@ -38,14 +38,6 @@ namespace TrackService.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<PlaylistResponse>>> GetAllPlaylists() // THIS METHOD EXISTS ONLY FOR TESTING. SHOULD NOT BE IN PRODUCTION
-        {
-            List<Playlist> playlists = await _context.Playlists.ToListAsync();
-
-            return Ok(playlists);
-        }
-
-        [HttpGet]
         [Route("{id}")]
         public async Task<ActionResult<List<PlaylistResponse>>> GetPlaylistById(Guid id)
         {
