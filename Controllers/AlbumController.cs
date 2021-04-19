@@ -27,13 +27,13 @@ namespace TrackService.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateAlbum(AlbumRequest request)
+        public async Task<ActionResult<AlbumResponse>> CreateAlbum(AlbumRequest request)
         {
             Album album = _converter.DtoToModel(request);
             _context.Albums.Add(album);
             await _context.SaveChangesAsync();
 
-            return Created("Created", album);
+            return Created("Created", _converter.ModelToDto(album));
         }
 
         [HttpGet]

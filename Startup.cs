@@ -43,7 +43,7 @@ namespace TrackService
                 options.AddPolicy(name: MyAllowSpecificOrigins,
                       builder =>
                       {
-                          builder.WithOrigins("*")
+                          builder.WithOrigins("http://localhost:5999/gateway/*") // Only allow API gateway to call service. Dev environment.
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowAnyOrigin();
