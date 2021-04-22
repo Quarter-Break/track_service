@@ -87,7 +87,7 @@ namespace TrackService
             // specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "API-Gateway");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "TrackService");
                 // Serve the swagger UI at the app's root
                 c.RoutePrefix = string.Empty;
             });
