@@ -29,7 +29,7 @@ namespace TrackService
             // Inject controllers.
             services.AddControllers();
             // Inject database context
-            var connection = Configuration.GetConnectionString("DefaultConnection");
+            var connection = Configuration.GetValue<string>("ConnectionString");
             services.AddDbContext<TrackContext>(
                 options => options.UseSqlServer(connection).UseLazyLoadingProxies());
 
