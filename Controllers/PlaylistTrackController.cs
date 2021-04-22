@@ -26,7 +26,7 @@ namespace TrackService.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> AddTrackToPlaylist(PlaylistTrackRequest request)
+        public async Task<ActionResult<PlaylistTrackResponse>> AddTrackToPlaylist(PlaylistTrackRequest request)
         {
             Playlist playlist = await _context.Playlists.FirstOrDefaultAsync(p => p.Id == request.PlaylistId);
             Track track = await _context.Tracks.FirstOrDefaultAsync(t => t.Id == request.TrackId);
@@ -44,7 +44,7 @@ namespace TrackService.Controllers
             _context.PlaylistTracks.Add(playlistTrack); // Insert playlistTrack object in db.
             _context.SaveChanges();
 
-            return Created("Created", playlistTrack);
+            return Created("Created", _converter.ModelToDto(playlistTrack));
         }
 
         [HttpDelete]
