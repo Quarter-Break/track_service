@@ -28,13 +28,13 @@ namespace TrackService.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreatePlaylist(PlaylistRequest request)
+        public async Task<ActionResult<PlaylistResponse>> CreatePlaylist(PlaylistRequest request)
         {
             Playlist playlist = _converter.DtoToModel(request);
             _context.Playlists.Add(playlist);
             await _context.SaveChangesAsync();
 
-            return Created("Created", playlist);
+            return Created("Created", _converter.ModelToDto(playlist));
         }
 
         [HttpGet]

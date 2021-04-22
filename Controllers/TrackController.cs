@@ -24,7 +24,7 @@ namespace TrackService.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateTrack(TrackRequest request)
+        public async Task<ActionResult<TrackResponse>> CreateTrack(TrackRequest request)
         {
             Album album = await _context.Albums.FirstOrDefaultAsync(e => e.Id == request.AlbumId);
 
@@ -37,7 +37,7 @@ namespace TrackService.Controllers
             _context.Tracks.Add(track);
             await _context.SaveChangesAsync();
 
-            return Created("Created", track);
+            return Created("Created", _converter.ModelToDto(track));
         }
 
         [HttpGet]
