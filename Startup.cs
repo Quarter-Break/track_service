@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using TrackService.Database.Contexts;
 using TrackService.Database.Models;
@@ -33,10 +32,6 @@ namespace TrackService
             var connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<TrackContext>(
                 options => options.UseSqlServer(connection).UseLazyLoadingProxies());
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "TrackService", Version = "v1" });
-            });
 
             services.AddCors(options =>
             {
@@ -55,6 +50,8 @@ namespace TrackService
             services.AddScoped<IDtoConverter<Album, AlbumRequest, AlbumResponse>, AlbumDtoConverter>();
             services.AddScoped<IDtoConverter<Playlist, PlaylistRequest, PlaylistResponse>, PlaylistDtoConverter>();
             services.AddScoped<IDtoConverter<PlaylistTrack, PlaylistTrackRequest, PlaylistTrackResponse>, PlaylistTrackDtoConverter>();
+            
+            services.AddSwaggerGen();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -65,8 +62,6 @@ namespace TrackService
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TrackService v1"));
             }
 
             app.UseCors(MyAllowSpecificOrigins);
@@ -80,6 +75,21 @@ namespace TrackService
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+            });
+
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger(c =>
+            {
+                c.SerializeAsV2 = true;
+            });
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+            // specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "API-Gateway");
+                // Serve the swagger UI at the app's root
+                c.RoutePrefix = string.Empty;
             });
         }
     }
