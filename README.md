@@ -29,4 +29,6 @@ docker network create qbreak-network
 
 #### Resources
 
+Repository pattern in .NET: https://www.programmingwithwolfgang.com/repository-pattern-net-core/
+
 Testing with Moq: https://softchris.github.io/pages/dotnet-moq.html#instruct-our-mock
