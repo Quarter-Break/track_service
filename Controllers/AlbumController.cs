@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using TrackService.Database.Converters;
 using TrackService.Database.Models;
 using TrackService.Database.Models.Dtos.Requests;
 using TrackService.Database.Models.Dtos.Responses;
+using TrackService.Services;
 
 namespace TrackService.Controllers
 {
@@ -15,47 +17,49 @@ namespace TrackService.Controllers
     [Route("api/[controller]")]
     public class AlbumController : Controller
     {
-        private readonly TrackContext _context;
+        private readonly IAlbumService _service;
         private readonly IDtoConverter<Album, AlbumRequest, AlbumResponse> _converter;
         private readonly IDtoConverter<Track, TrackRequest, TrackResponse> _trackConverter;
-        public AlbumController(TrackContext context, IDtoConverter<Album, AlbumRequest, AlbumResponse> converter,
+        public AlbumController(IAlbumService service,
+            IDtoConverter<Album, AlbumRequest, AlbumResponse> converter,
             IDtoConverter<Track, TrackRequest, TrackResponse> trackConverter)
         {
-            _context = context;
+            _service = service;
             _converter = converter;
             _trackConverter = trackConverter;
         }
 
         [HttpPost]
-        public async Task<ActionResult<AlbumResponse>> CreateAlbum(AlbumRequest request)
+        public async Task<ActionResult<AlbumResponse>> AddAlbum(AlbumRequest request)
         {
-            Album album = _converter.DtoToModel(request);
-            _context.Albums.Add(album);
-            await _context.SaveChangesAsync();
+            Album album = _converter.DtoToModel(request); // Create album from request.
+            await _service.AddAlbumAsync(album); // Add to db using service.
 
-            return Created("Created", _converter.ModelToDto(album));
+            return Created("Created", _converter.ModelToDto(album)); // Return response.
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<AlbumResponse>>> GetAllAlbums()
+        [Route("{id}")]
+        public async Task<ActionResult<AlbumResponse>> GetAlbumById(Guid id)
         {
-            List<AlbumResponse> albums = _converter.ModelToDto(await _context.Albums.ToListAsync());
+            return Ok(_converter.ModelToDto(await _service.GetAlbumByIdAsync(id)));
+        }
 
-            foreach (AlbumResponse album in albums)
-            {
-                album.Tracks = new();
-                List<Track> tracks = await _context.Tracks.Where(e => e.AlbumId == album.Id).ToListAsync(); // Find all tracks with albumId.
-                List<AlbumTrackResponse> albumTrackResponses = new();
+        [HttpPut]
+        [Route("{id}")]
+        public async Task<ActionResult<AlbumResponse>> UpdateAlbum(Guid id, AlbumRequest request)
+        {
+            Album album = _converter.DtoToModel(request);
+            album.Id = id; // Add id so record is updated instead of inserted.
 
-                foreach(Track track in tracks)
-                {
-                    albumTrackResponses.Add(new AlbumTrackResponse(track));
-                }
+            return Ok(_converter.ModelToDto(await _service.UpdateAlbumAsync(album)));
+        }
 
-                album.Tracks = albumTrackResponses;
-            }
-
-            return Ok(albums);
+        [HttpDelete]
+        [Route("{id}")]
+        public async Task<ActionResult<AlbumResponse>> DeleteAlbumById(Guid id)
+        {
+            return Ok(_converter.ModelToDto(await _service.DeleteAlbumByIdAsync(id)));
         }
     }
 }

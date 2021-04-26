@@ -9,6 +9,9 @@ using TrackService.Database.Models;
 using TrackService.Database.Converters;
 using TrackService.Database.Models.Dtos.Requests;
 using TrackService.Database.Models.Dtos.Responses;
+using LocatieService.Repositories;
+using TrackService.Repositories;
+using TrackService.Services;
 
 namespace TrackService
 {
@@ -45,13 +48,20 @@ namespace TrackService
                       });
             });
 
-            // Inject converters
+            // Inject converters.
             services.AddScoped<IDtoConverter<Track, TrackRequest, TrackResponse>, TrackDtoConverter>();
             services.AddScoped<IDtoConverter<Album, AlbumRequest, AlbumResponse>, AlbumDtoConverter>();
             services.AddScoped<IDtoConverter<Playlist, PlaylistRequest, PlaylistResponse>, PlaylistDtoConverter>();
             services.AddScoped<IDtoConverter<PlaylistTrack, PlaylistTrackRequest, PlaylistTrackResponse>, PlaylistTrackDtoConverter>();
             
             services.AddSwaggerGen();
+
+            // Inject repositories.
+            services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
+            services.AddTransient<IAlbumRepository, AlbumRepository>();
+
+            // Inject services.
+            services.AddTransient<IAlbumService, AlbumService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

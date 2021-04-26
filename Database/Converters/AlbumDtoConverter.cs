@@ -20,13 +20,26 @@ namespace TrackService.Database.Converters
 
         public AlbumResponse ModelToDto(Album model)
         {
+            List<AlbumTrackResponse> tracks = new();
+
+            // Convert tracklist to response list.
+            if (model.Tracks != null)
+            {
+                foreach (Track track in model.Tracks)
+                {
+                    tracks.Add(new AlbumTrackResponse(track));
+                }
+
+            }
+
             return new AlbumResponse
             {
                 Id = model.Id,
                 Title = model.Title,
                 ArtistId = model.ArtistId,
                 ReleaseDate = model.ReleaseDate,
-                CoverPath = model.CoverPath
+                CoverPath = model.CoverPath,
+                Tracks = tracks
             };
         }
 
