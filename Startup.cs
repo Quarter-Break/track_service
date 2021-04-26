@@ -59,9 +59,11 @@ namespace TrackService
             // Inject repositories.
             services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
             services.AddTransient<IAlbumRepository, AlbumRepository>();
+            services.AddTransient<ITrackRepository, TrackRepository>();
 
             // Inject services.
             services.AddTransient<IAlbumService, AlbumService>();
+            services.AddTransient<ITrackService, TrackModelService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

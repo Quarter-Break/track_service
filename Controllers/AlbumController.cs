@@ -33,9 +33,8 @@ namespace TrackService.Controllers
         public async Task<ActionResult<AlbumResponse>> AddAlbum(AlbumRequest request)
         {
             Album album = _converter.DtoToModel(request); // Create album from request.
-            await _service.AddAlbumAsync(album); // Add to db using service.
 
-            return Created("Created", _converter.ModelToDto(album)); // Return response.
+            return Created("Created", _converter.ModelToDto(await _service.AddAlbumAsync(album))); // Return response.
         }
 
         [HttpGet]
@@ -57,9 +56,11 @@ namespace TrackService.Controllers
 
         [HttpDelete]
         [Route("{id}")]
-        public async Task<ActionResult<AlbumResponse>> DeleteAlbumById(Guid id)
+        public async Task<ActionResult> DeleteAlbumById(Guid id)
         {
-            return Ok(_converter.ModelToDto(await _service.DeleteAlbumByIdAsync(id)));
+            await _service.DeleteAlbumByIdAsync(id); // Delete record.
+
+            return Ok(); // Return nothing with 200 status code.
         }
     }
 }

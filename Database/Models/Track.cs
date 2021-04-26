@@ -10,6 +10,5 @@ namespace TrackService.Database.Models
         public string TrackId { get; set; }
         public Guid ArtistId { get; set; }
         public Guid AlbumId { get; set; }
-        public virtual List<PlaylistTrack> PlaylistTracks { get; set; }
     }
 }
