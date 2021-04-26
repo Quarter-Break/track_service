@@ -9,6 +9,7 @@ using TrackService.Database.Converters;
 using TrackService.Database.Models;
 using TrackService.Database.Models.Dtos.Requests;
 using TrackService.Database.Models.Dtos.Responses;
+using TrackService.Services;
 
 namespace TrackService.Controllers
 {
@@ -16,50 +17,34 @@ namespace TrackService.Controllers
     [Route("api/[controller]")]
     public class PlaylistTrackController : Controller
     {
-        private readonly TrackContext _context;
+        private readonly IPlaylistTrackService _service;
         private readonly IDtoConverter<PlaylistTrack, PlaylistTrackRequest, PlaylistTrackResponse> _converter;
 
-        public PlaylistTrackController(TrackContext context, IDtoConverter<PlaylistTrack, PlaylistTrackRequest, PlaylistTrackResponse> converter)
+        public PlaylistTrackController(IPlaylistTrackService service,
+            IDtoConverter<PlaylistTrack, PlaylistTrackRequest, PlaylistTrackResponse> converter)
         {
-            _context = context;
+            _service = service;
             _converter = converter;
         }
 
         [HttpPost]
         public async Task<ActionResult<PlaylistTrackResponse>> AddTrackToPlaylist(PlaylistTrackRequest request)
         {
-            Playlist playlist = await _context.Playlists.FirstOrDefaultAsync(p => p.Id == request.PlaylistId);
-            Track track = await _context.Tracks.FirstOrDefaultAsync(t => t.Id == request.TrackId);
+            return Created("Created", await _service.AddPlaylistTrackAsync(request));
+        }
 
-            if (playlist == null) // Check if playlist exists.
-            {
-                return NotFound("Playlist does not exist.");
-            }
-
-            if (track == null) // Check if track exists.
-            {
-                return NotFound("Track does not exist.");
-            }
-            PlaylistTrack playlistTrack = _converter.DtoToModel(request);
-            _context.PlaylistTracks.Add(playlistTrack); // Insert playlistTrack object in db.
-            _context.SaveChanges();
-
-            return Created("Created", _converter.ModelToDto(playlistTrack));
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<ActionResult<PlaylistTrackResponse>> GetPlaylistTrackById(Guid id)
+        {
+            return Ok(_converter.ModelToDto(await _service.GetByIdAsync(id)));
         }
 
         [HttpDelete]
         [Route("{id}")]
         public async Task<ActionResult> DeleteById(Guid id)
         {
-            PlaylistTrack playlistTrack = await _context.PlaylistTracks.FirstOrDefaultAsync(e => e.Id == id);
-
-            if (playlistTrack == null)
-            {
-                return NotFound($"PlaylistTrack with id {id} does not exist.");
-            }
-
-            _context.Remove(playlistTrack); // Remove track from playlist.
-            _context.SaveChanges();
+            await _service.DeletePlaylistTrackByIdAsync(id);
 
             return Ok();
         }

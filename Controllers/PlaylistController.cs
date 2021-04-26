@@ -1,14 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using TrackService.Database.Contexts;
 using TrackService.Database.Converters;
 using TrackService.Database.Models;
 using TrackService.Database.Models.Dtos.Requests;
 using TrackService.Database.Models.Dtos.Responses;
+using TrackService.Services;
 
 namespace TrackService.Controllers
 {
@@ -16,55 +14,54 @@ namespace TrackService.Controllers
     [Route("api/[controller]")]
     public class PlaylistController : Controller
     {
-        private readonly TrackContext _context;
+        private readonly IPlaylistService _service;
         private readonly IDtoConverter<Playlist, PlaylistRequest, PlaylistResponse> _converter;
-        private readonly IDtoConverter<Track, TrackRequest, TrackResponse> _trackConverter;
-        public PlaylistController(TrackContext context, IDtoConverter<Playlist, PlaylistRequest, PlaylistResponse> converter,
-            IDtoConverter<Track, TrackRequest, TrackResponse> trackConverter)
+        public PlaylistController(IPlaylistService service,
+            IDtoConverter<Playlist, PlaylistRequest, PlaylistResponse> converter)
         {
-            _context = context;
+            _service = service;
             _converter = converter;
-            _trackConverter = trackConverter;
         }
 
         [HttpPost]
-        public async Task<ActionResult<PlaylistResponse>> CreatePlaylist(PlaylistRequest request)
+        public async Task<ActionResult<PlaylistResponse>> AddPlaylist(PlaylistRequest request)
         {
             Playlist playlist = _converter.DtoToModel(request);
-            _context.Playlists.Add(playlist);
-            await _context.SaveChangesAsync();
 
-            return Created("Created", _converter.ModelToDto(playlist));
+            return Created("Created", _converter.ModelToDto(await _service.AddPlaylistAsync(playlist)));
         }
 
         [HttpGet]
         [Route("{id}")]
-        public async Task<ActionResult<List<PlaylistResponse>>> GetPlaylistById(Guid id)
+        public async Task<ActionResult<PlaylistResponse>> GetPlaylistById(Guid id)
         {
-            Playlist playlist = await _context.Playlists.FirstOrDefaultAsync(e => e.Id == id);
-            if (playlist == null)
-            {
-                return NotFound($"Playlist with id {id} does not exist.");
-            }
+            return Ok(await _service.GetPlaylistByIdAsync(id));
+        }
 
-            List<PlaylistTrack> playlistTracks = await _context.PlaylistTracks.Where(e => e.PlaylistId == id).ToListAsync();
-            List<TrackResponse> tracks = new();
-            foreach(PlaylistTrack playlistTrack in playlistTracks)
-            {
-                Track track = await _context.Tracks.FirstOrDefaultAsync(e => e.Id == playlistTrack.TrackId);
-                if (track != null)
-                {
-                    TrackResponse trackResponse = _trackConverter.ModelToDto(track);
-                    Album album = await _context.Albums.FirstOrDefaultAsync(e => e.Id == track.AlbumId); // Find album.
-                    trackResponse.Album = new TrackAlbumResponse(album);
-                    tracks.Add(trackResponse);
-                }
-            }
+        [HttpGet]
+        [Route("user/{id}")]
+        public async Task<ActionResult<List<PlaylistResponse>>> GetPlaylistByUserId(Guid id)
+        {
+            return Ok(await _service.GetAllByUserIdAsync(id));
+        }
 
-            PlaylistResponse playlistResponse = _converter.ModelToDto(playlist);
-            playlistResponse.Tracks = tracks;
+        [HttpPut]
+        [Route("{id}")]
+        public async Task<ActionResult<PlaylistResponse>> UpdatePlaylist(Guid id, PlaylistRequest request)
+        {
+            Playlist playlist = _converter.DtoToModel(request);
+            playlist.Id = id;
 
-            return Ok(playlistResponse);
+            return Ok(_converter.ModelToDto(await _service.UpdatePlaylistAsync(playlist)));
+        }
+
+        [HttpDelete]
+        [Route("{id}")]
+        public async Task<ActionResult<PlaylistResponse>> DeletePlaylistById(Guid id)
+        {
+            await _service.DeletePlaylistByIdAsync(id);
+
+            return Ok();
         }
     }
 }

@@ -53,17 +53,21 @@ namespace TrackService
             services.AddScoped<IDtoConverter<Album, AlbumRequest, AlbumResponse>, AlbumDtoConverter>();
             services.AddScoped<IDtoConverter<Playlist, PlaylistRequest, PlaylistResponse>, PlaylistDtoConverter>();
             services.AddScoped<IDtoConverter<PlaylistTrack, PlaylistTrackRequest, PlaylistTrackResponse>, PlaylistTrackDtoConverter>();
-            
+
             services.AddSwaggerGen();
 
             // Inject repositories.
             services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
             services.AddTransient<IAlbumRepository, AlbumRepository>();
             services.AddTransient<ITrackRepository, TrackRepository>();
+            services.AddTransient<IPlaylistRepository, PlaylistRepository>();
+            services.AddTransient<IPlaylistTrackRepository, PlaylistTrackRepository>();
 
             // Inject services.
             services.AddTransient<IAlbumService, AlbumService>();
             services.AddTransient<ITrackService, TrackModelService>();
+            services.AddTransient<IPlaylistService, PlaylistService>();
+            services.AddTransient<IPlaylistTrackService, PlaylistTrackService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

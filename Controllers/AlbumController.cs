@@ -19,14 +19,11 @@ namespace TrackService.Controllers
     {
         private readonly IAlbumService _service;
         private readonly IDtoConverter<Album, AlbumRequest, AlbumResponse> _converter;
-        private readonly IDtoConverter<Track, TrackRequest, TrackResponse> _trackConverter;
         public AlbumController(IAlbumService service,
-            IDtoConverter<Album, AlbumRequest, AlbumResponse> converter,
-            IDtoConverter<Track, TrackRequest, TrackResponse> trackConverter)
+            IDtoConverter<Album, AlbumRequest, AlbumResponse> converter)
         {
             _service = service;
             _converter = converter;
-            _trackConverter = trackConverter;
         }
 
         [HttpPost]

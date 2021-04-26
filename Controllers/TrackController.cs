@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
 using TrackService.Database.Converters;
@@ -15,14 +14,11 @@ namespace TrackService.Controllers
     public class TrackController : Controller
     {
         private readonly ITrackService _service;
-        private readonly IAlbumService _albumService;
         private readonly IDtoConverter<Track, TrackRequest, TrackResponse> _converter;
         public TrackController(ITrackService service,
-            IAlbumService albumService,
             IDtoConverter<Track, TrackRequest, TrackResponse> converter)
         {
             _service = service;
-            _albumService = albumService;
             _converter = converter;
         }
 
@@ -38,19 +34,7 @@ namespace TrackService.Controllers
         [Route("{id}")]
         public async Task<ActionResult<TrackResponse>> GetTrackById(Guid id)
         {
-            Track track = await _service.GetTrackByIdAsync(id);
-
-            Album album = await _albumService.GetAlbumByIdAsync(track.AlbumId); // Find album.
-
-            if (album == null)
-            {
-                return NotFound($"Album with id {id} not found.");
-            }
-
-            TrackResponse trackResponse = _converter.ModelToDto(track); // Convert to response.
-            trackResponse.Album = new TrackAlbumResponse(album); // Add album.
-
-            return Ok(trackResponse);
+            return Ok(await _service.GetTrackByIdAsync(id));
         }
 
         [HttpPut]
