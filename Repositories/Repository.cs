@@ -40,7 +40,7 @@ namespace LocatieService.Repositories
             }
             catch (Exception ex)
             {
-                throw new Exception($"Couldn't create entity: {ex.Message}");
+                throw new Exception($"Couldn't delete entity: {ex.Message}");
             }
         }
 

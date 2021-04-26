@@ -1,6 +1,7 @@
 ﻿using LocatieService.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TrackService.Database.Contexts;
@@ -24,7 +25,12 @@ namespace TrackService.Repositories
         {
             Album album = await GetAll().FirstOrDefaultAsync(e => e.Id == id);
 
-            album.Tracks = await _context.Tracks.Where(e => e.AlbumId == id).ToListAsync(); // Add tracks to album model.
+            if(album == null)
+            {
+                throw new Exception($"Album with id {id} not found.");
+            }
+
+            album.Tracks = await _context.Tracks.Where(e => e.AlbumId == id).ToListAsync();
 
             return album;
         }
