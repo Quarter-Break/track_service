@@ -1,13 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using TrackService.Database.Contexts;
 using TrackService.Database.Converters;
 using TrackService.Database.Models;
 using TrackService.Database.Models.Dtos.Requests;
 using TrackService.Database.Models.Dtos.Responses;
+using TrackService.Services;
 
 namespace TrackService.Controllers
 {
@@ -15,64 +13,47 @@ namespace TrackService.Controllers
     [Route("api/[controller]")]
     public class TrackController : Controller
     {
-        private readonly TrackContext _context;
+        private readonly ITrackService _service;
         private readonly IDtoConverter<Track, TrackRequest, TrackResponse> _converter;
-        public TrackController(TrackContext context, IDtoConverter<Track, TrackRequest, TrackResponse> converter)
+        public TrackController(ITrackService service,
+            IDtoConverter<Track, TrackRequest, TrackResponse> converter)
         {
-            _context = context;
+            _service = service;
             _converter = converter;
         }
 
         [HttpPost]
-        public async Task<ActionResult<TrackResponse>> CreateTrack(TrackRequest request)
+        public async Task<ActionResult<TrackResponse>> AddTrack(TrackRequest request)
         {
-            Album album = await _context.Albums.FirstOrDefaultAsync(e => e.Id == request.AlbumId);
-
-            if (album == null)
-            {
-                return NotFound($"Album with id {request.AlbumId} does not exist.");
-            }
-
             Track track = _converter.DtoToModel(request);
-            _context.Tracks.Add(track);
-            await _context.SaveChangesAsync();
 
-            return Created("Created", _converter.ModelToDto(track));
-        }
-
-        [HttpGet]
-        public async Task<ActionResult<List<TrackResponse>>> GetAllTracks()
-        {
-            List<Track> tracks = await _context.Tracks.ToListAsync();
-            List<TrackResponse> trackResponses = new();
-
-            foreach (Track track in tracks)
-            {
-                Album album = await _context.Albums.FirstOrDefaultAsync(e => e.Id == track.AlbumId); // Find album.
-                TrackResponse trackResponse = _converter.ModelToDto(track);
-                trackResponse.Album = new TrackAlbumResponse(album);
-                trackResponses.Add(trackResponse);
-            }
-
-            return Ok(trackResponses);
+            return Created("Created", _converter.ModelToDto(await _service.AddTrackAsync(track)));
         }
 
         [HttpGet]
         [Route("{id}")]
         public async Task<ActionResult<TrackResponse>> GetTrackById(Guid id)
         {
-            Track track = await _context.Tracks.FirstOrDefaultAsync(e => e.Id == id);
+            return Ok(await _service.GetTrackByIdAsync(id));
+        }
 
-            if (track == null)
-            {
-                return NotFound("Object not found.");
-            }
+        [HttpPut]
+        [Route("{id}")]
+        public async Task<ActionResult<TrackResponse>> UpdateTrack(Guid id, TrackRequest request)
+        {
+            Track track = _converter.DtoToModel(request); // Create model from updated info.
+            track.Id = id; // Add id so record is updated instead of inserted.
 
-            Album album = await _context.Albums.FirstOrDefaultAsync(e => e.Id == track.AlbumId); // Find album.
-            TrackResponse trackResponse = _converter.ModelToDto(track);
-            trackResponse.Album = new TrackAlbumResponse(album);
+            return Ok(_converter.ModelToDto(await _service.UpdateTrackAsync(track)));
+        }
 
-            return Ok(trackResponse);
+        [HttpDelete]
+        [Route("{id}")]
+        public async Task<ActionResult> DeleteTrackById(Guid id)
+        {
+            await _service.DeleteTrackByIdAsync(id); // Delete record.
+
+            return Ok(); // Return nothing with 200 status code.
         }
     }
 }

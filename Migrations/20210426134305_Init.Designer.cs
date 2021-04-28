@@ -10,7 +10,7 @@ using TrackService.Database.Contexts;
 namespace TrackService.Migrations
 {
     [DbContext(typeof(TrackContext))]
-    [Migration("20210417150913_Init")]
+    [Migration("20210426134305_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -82,8 +82,6 @@ namespace TrackService.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TrackId");
-
                     b.ToTable("playlist_track");
                 });
 
@@ -121,15 +119,6 @@ namespace TrackService.Migrations
                     b.ToTable("track");
                 });
 
-            modelBuilder.Entity("TrackService.Database.Models.PlaylistTrack", b =>
-                {
-                    b.HasOne("TrackService.Database.Models.Track", null)
-                        .WithMany("PlaylistTracks")
-                        .HasForeignKey("TrackId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("TrackService.Database.Models.Track", b =>
                 {
                     b.HasOne("TrackService.Database.Models.Album", null)
@@ -151,11 +140,6 @@ namespace TrackService.Migrations
             modelBuilder.Entity("TrackService.Database.Models.Playlist", b =>
                 {
                     b.Navigation("Tracks");
-                });
-
-            modelBuilder.Entity("TrackService.Database.Models.Track", b =>
-                {
-                    b.Navigation("PlaylistTracks");
                 });
 #pragma warning restore 612, 618
         }

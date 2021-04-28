@@ -14,8 +14,9 @@ services:
             - qbreak-network
     db:
         image: "mcr.microsoft.com/mssql/server"
+        container_name: trackdb
         volumes:
-          - track_volume:/var/opt/mssql
+          - track_volume:/var/opt/mssql/
         environment:
             SA_PASSWORD: "HW5etW#4iyWCNu"
             ACCEPT_EULA: "Y"

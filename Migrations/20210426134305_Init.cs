@@ -37,6 +37,19 @@ namespace TrackService.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "playlist_track",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PlaylistId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TrackId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_playlist_track", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "track",
                 columns: table => new
                 {
@@ -63,30 +76,6 @@ namespace TrackService.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
-
-            migrationBuilder.CreateTable(
-                name: "playlist_track",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PlaylistId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TrackId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_playlist_track", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_playlist_track_track_TrackId",
-                        column: x => x.TrackId,
-                        principalTable: "track",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_playlist_track_TrackId",
-                table: "playlist_track",
-                column: "TrackId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_track_AlbumId",

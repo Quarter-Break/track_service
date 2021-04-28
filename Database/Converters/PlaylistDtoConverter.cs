@@ -33,7 +33,7 @@ namespace TrackService.Database.Converters
                 Title = model.Title,
                 Description = model.Description,
                 UserId = model.UserId,
-                Tracks = _trackConverter.ModelToDto(model.Tracks)
+                // Add in repository.
             };
         }
 
