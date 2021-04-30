@@ -9,8 +9,6 @@ using TrackService.Database.Models;
 using TrackService.Database.Converters;
 using TrackService.Database.Models.Dtos.Requests;
 using TrackService.Database.Models.Dtos.Responses;
-using LocatieService.Repositories;
-using TrackService.Repositories;
 using TrackService.Services;
 
 namespace TrackService
@@ -55,13 +53,6 @@ namespace TrackService
             services.AddScoped<IDtoConverter<PlaylistTrack, PlaylistTrackRequest, PlaylistTrackResponse>, PlaylistTrackDtoConverter>();
 
             services.AddSwaggerGen();
-
-            // Inject repositories.
-            services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
-            services.AddTransient<IAlbumRepository, AlbumRepository>();
-            services.AddTransient<ITrackRepository, TrackRepository>();
-            services.AddTransient<IPlaylistRepository, PlaylistRepository>();
-            services.AddTransient<IPlaylistTrackRepository, PlaylistTrackRepository>();
 
             // Inject services.
             services.AddTransient<IAlbumService, AlbumService>();

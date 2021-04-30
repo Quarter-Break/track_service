@@ -1,48 +1,87 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Threading.Tasks;
+using TrackService.Database.Contexts;
 using TrackService.Database.Converters;
 using TrackService.Database.Models;
 using TrackService.Database.Models.Dtos.Requests;
 using TrackService.Database.Models.Dtos.Responses;
-using TrackService.Repositories;
 
 namespace TrackService.Services
 {
     public class TrackModelService : ITrackService
     {
-        private readonly ITrackRepository _repository;
+        private readonly TrackContext _context;
         private readonly IDtoConverter<Track, TrackRequest, TrackResponse> _converter;
 
-        public TrackModelService(ITrackRepository repository,
-           IDtoConverter<Track, TrackRequest, TrackResponse> converter)
+        public TrackModelService(TrackContext context,
+             IDtoConverter<Track, TrackRequest, TrackResponse> converter)
         {
-            _repository = repository;
+            _context = context;
             _converter = converter;
         }
 
-        public async Task<Track> AddTrackAsync(Track track)
+        public async Task<TrackResponse> AddAsync(TrackRequest request)
         {
-            return await _repository.AddAsync(track);
+            Track track = _converter.DtoToModel(request);
+            await _context.AddAsync(track);
+            await _context.SaveChangesAsync();
+
+            return await CreateResponseAsync(track);
         }
 
-        public async Task<Track> DeleteTrackByIdAsync(Guid id)
+
+        public async Task<TrackResponse> GetByIdAsync(Guid id)
         {
-            return await _repository.DeleteAsync(await _repository.GetRawById(id));
+            Track track = await GetRawByIdAsync(id);
+
+            return await CreateResponseAsync(track);
         }
 
-        public async Task<Track> GetRawById(Guid id)
+        public async Task<TrackResponse> UpdateAsync(Guid id, TrackRequest request)
         {
-            return await _repository.GetRawById(id);
+            Track track = _converter.DtoToModel(request);
+            track.Id = id;
+
+            _context.Update(track);
+            await _context.SaveChangesAsync();
+
+            return await CreateResponseAsync(track);
         }
 
-        public async Task<TrackResponse> GetTrackByIdAsync(Guid id)
+        public async Task DeleteByIdAsync(Guid id)
         {
-            return await _repository.GetByIdAsync(id);
+            Track track = await GetRawByIdAsync(id);
+
+            _context.Remove(track);
+            await _context.SaveChangesAsync();
         }
 
-        public async Task<Track> UpdateTrackAsync(Track track)
+        private async Task<Track> GetRawByIdAsync(Guid id)
         {
-            return await _repository.UpdateAsync(track);
+            Track track = await _context.Tracks.FirstOrDefaultAsync(e => e.Id == id);
+
+            if (track == null)
+            {
+                throw new Exception($"Track with id {id} not found.");
+            }
+
+            return track;
+        }
+
+        private async Task<TrackResponse> CreateResponseAsync(Track track)
+        {
+            Album album = await _context.Albums.FirstOrDefaultAsync(e => e.Id == track.AlbumId); // Find album.
+
+            if (album == null)
+            {
+                throw new Exception($"Album with id {track.AlbumId} not found.");
+            }
+
+            TrackResponse trackResponse = _converter.ModelToDto(track); // Convert to response.
+            trackResponse.Album = new TrackAlbumResponse(album); // Add album.
+
+            return trackResponse;
         }
     }
 }

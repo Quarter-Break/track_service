@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Threading.Tasks;
-using TrackService.Database.Models;
+using TrackService.Database.Models.Dtos.Requests;
+using TrackService.Database.Models.Dtos.Responses;
 
 namespace TrackService.Services
 {
     public interface IAlbumService
     {
-        Task<Album> AddAlbumAsync(Album album);
-        Task<Album> GetAlbumByIdAsync(Guid id);
-        Task<Album> UpdateAlbumAsync(Album album);
-        Task<Album> DeleteAlbumByIdAsync(Guid id);
+        Task<AlbumResponse> AddAsync(AlbumRequest request);
+        Task<AlbumResponse> GetByIdAsync(Guid id);
+        Task<AlbumResponse> UpdateAsync(Guid id, AlbumRequest request);
+        Task DeleteByIdAsync(Guid id);
     }
 }
