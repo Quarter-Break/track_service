@@ -1,45 +1,61 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Threading.Tasks;
+using TrackService.Database.Contexts;
 using TrackService.Database.Converters;
 using TrackService.Database.Models;
 using TrackService.Database.Models.Dtos.Requests;
 using TrackService.Database.Models.Dtos.Responses;
-using TrackService.Repositories;
 
 namespace TrackService.Services
 {
     public class PlaylistTrackService : IPlaylistTrackService
     {
-        private readonly IPlaylistTrackRepository _repository;
+        private readonly TrackContext _context;
         private readonly IDtoConverter<PlaylistTrack, PlaylistTrackRequest, PlaylistTrackResponse> _converter;
 
-
-        public PlaylistTrackService(IPlaylistTrackRepository repository,
+        public PlaylistTrackService(TrackContext context,
             IDtoConverter<PlaylistTrack, PlaylistTrackRequest, PlaylistTrackResponse> converter)
         {
-            _repository = repository;
+            _context = context;
             _converter = converter;
         }
 
-        public async Task<PlaylistTrack> AddPlaylistTrackAsync(PlaylistTrackRequest request)
+        public async Task<PlaylistTrackResponse> AddAsync(PlaylistTrackRequest request)
         {
             PlaylistTrack playlistTrack = _converter.DtoToModel(request);
+            await _context.AddAsync(playlistTrack);
+            await _context.SaveChangesAsync();
 
-            return await _repository.AddAsync(playlistTrack);
+            return _converter.ModelToDto(playlistTrack);
         }
 
-        public async Task<PlaylistTrack> DeletePlaylistTrackByIdAsync(Guid id)
-        {
-            PlaylistTrack playlistTrack = await _repository.GetByIdAsync(id);
 
-            return await _repository.DeleteAsync(playlistTrack);
+        public async Task<PlaylistTrackResponse> GetByIdAsync(Guid id)
+        {
+            PlaylistTrack playlistTrack = await GetRawByIdAsync(id);
+
+            return _converter.ModelToDto(playlistTrack);
         }
 
-        public async Task<PlaylistTrack> GetByIdAsync(Guid id)
+        public async Task DeleteByIdAsync(Guid id)
         {
-            return await _repository.GetByIdAsync(id);
+            PlaylistTrack playlistTrack = await GetRawByIdAsync(id);
+
+            _context.Remove(playlistTrack);
+            await _context.SaveChangesAsync();
+        }
+
+        private async Task<PlaylistTrack> GetRawByIdAsync(Guid id)
+        {
+            PlaylistTrack playlistTrack = await _context.PlaylistTracks.FirstOrDefaultAsync(e => e.Id == id);
+
+            if (playlistTrack == null)
+            {
+                throw new Exception($"PlaylistTrack with id {id} not found.");
+            }
+
+            return playlistTrack;
         }
     }
 }

@@ -9,11 +9,10 @@ namespace TrackService.Services
 {
     public interface IPlaylistService
     {
-        Task<Playlist> AddPlaylistAsync(Playlist playlist);
-        Task<PlaylistResponse> GetPlaylistByIdAsync(Guid id);
-        Task<Playlist> GetRawById(Guid id);
-        Task<Playlist> UpdatePlaylistAsync(Playlist playlist);
-        Task<Playlist> DeletePlaylistByIdAsync(Guid id);
+        Task<PlaylistResponse> AddAsync(PlaylistRequest request);
+        Task<PlaylistResponse> GetByIdAsync(Guid id);
         Task<List<PlaylistResponse>> GetAllByUserIdAsync(Guid id);
+        Task<PlaylistResponse> UpdateAsync(Guid id, PlaylistRequest request);
+        Task DeleteByIdAsync(Guid id);
     }
 }
