@@ -1,5 +1,6 @@
 # Track Service
 [![Build .NET API](https://github.com/Quarter-Break/track_service/actions/workflows/build_test.yml/badge.svg)](https://github.com/Quarter-Break/track_service/actions/workflows/build_test.yml)
+[![Publish .NET API](https://github.com/Quarter-Break/track_service/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/Quarter-Break/track_service/actions/workflows/docker-publish.yml)
 
 .NET Core 5.0 service for track information.
 
