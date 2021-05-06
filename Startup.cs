@@ -34,12 +34,13 @@ namespace TrackService
             services.AddDbContext<TrackContext>(
                 options => options.UseSqlServer(connection).UseLazyLoadingProxies());
 
+            var origin = Configuration.GetValue<string>("CorsPolicy");
             services.AddCors(options =>
             {
                 options.AddPolicy(name: MyAllowSpecificOrigins,
                       builder =>
                       {
-                          builder.WithOrigins("http://localhost:5999/gateway/*") // Only allow API gateway to call service. Dev environment.
+                          builder.WithOrigins(origin) // Only allow API gateway to call service.
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowAnyOrigin();
