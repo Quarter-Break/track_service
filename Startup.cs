@@ -34,7 +34,7 @@ namespace TrackService
             services.AddDbContext<TrackContext>(
                 options => options.UseSqlServer(connection).UseLazyLoadingProxies());
 
-            var origin = Configuration.GetValue<string>("CorsPolicy");
+            var origin = Configuration.GetValue<string>("AppSettings:CorsPolicy");
             services.AddCors(options =>
             {
                 options.AddPolicy(name: MyAllowSpecificOrigins,
