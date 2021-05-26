@@ -10,6 +10,7 @@ using TrackService.Database.Converters;
 using TrackService.Database.Models.Dtos.Requests;
 using TrackService.Database.Models.Dtos.Responses;
 using TrackService.Services;
+using TrackService.Messaging;
 
 namespace TrackService
 {
@@ -60,6 +61,9 @@ namespace TrackService
             services.AddTransient<ITrackService, TrackModelService>();
             services.AddTransient<IPlaylistService, PlaylistService>();
             services.AddTransient<IPlaylistTrackService, PlaylistTrackService>();
+
+            // Add RabbitMQ.
+            services.AddHostedService<UserUpdateReceiver>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
