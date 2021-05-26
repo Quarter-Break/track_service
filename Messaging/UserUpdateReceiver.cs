@@ -72,7 +72,7 @@ namespace TrackService.Messaging
         {
             // This should NEVER be done in an actual application.
             // This line merely exists to demonstrate receiving a message.
-            Console.WriteLine("Updated user:", updateUserModel);
+            Console.WriteLine("Updated user: " + updateUserModel.Id);
         }
 
         private void OnConsumerCancelled(object sender, ConsumerEventArgs e)

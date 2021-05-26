@@ -11,6 +11,7 @@ using TrackService.Database.Models.Dtos.Requests;
 using TrackService.Database.Models.Dtos.Responses;
 using TrackService.Services;
 using TrackService.Messaging;
+using UserService.Messaging.Options;
 
 namespace TrackService
 {
@@ -63,6 +64,9 @@ namespace TrackService
             services.AddTransient<IPlaylistTrackService, PlaylistTrackService>();
 
             // Add RabbitMQ.
+            var serviceClientSettingsConfig = Configuration.GetSection("RabbitMq");
+            var serviceClientSettings = serviceClientSettingsConfig.Get<RabbitMqConfiguration>();
+            services.Configure<RabbitMqConfiguration>(serviceClientSettingsConfig);
             services.AddHostedService<UserUpdateReceiver>();
         }
 
