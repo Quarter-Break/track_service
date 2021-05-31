@@ -64,10 +64,13 @@ namespace TrackService
             services.AddTransient<IPlaylistTrackService, PlaylistTrackService>();
 
             // Add RabbitMQ.
-            var serviceClientSettingsConfig = Configuration.GetSection("RabbitMq");
-            var serviceClientSettings = serviceClientSettingsConfig.Get<RabbitMqConfiguration>();
-            services.Configure<RabbitMqConfiguration>(serviceClientSettingsConfig);
-            services.AddHostedService<UserUpdateReceiver>();
+            if (Configuration.GetValue<bool>("RabbitMq:Enabled"))
+            {
+                var serviceClientSettingsConfig = Configuration.GetSection("RabbitMq");
+                var serviceClientSettings = serviceClientSettingsConfig.Get<RabbitMqConfiguration>();
+                services.Configure<RabbitMqConfiguration>(serviceClientSettingsConfig);
+                services.AddHostedService<UserUpdateReceiver>();
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
